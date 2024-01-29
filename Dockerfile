@@ -59,7 +59,7 @@ RUN echo "deb http://repo.mysql.com/apt/debian/ bullseye mysql-${MYSQL_MAJOR}" >
 # "The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 8C718D3B5072E1F5"
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys B7B3B788A8D3785C \
     && apt-get update \
-    && apt-get install -y mysql-community-client-core \
+    && apt-get install -y default-mysql-client-core \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /etc/default /etc/mysql
