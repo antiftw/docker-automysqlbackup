@@ -67,10 +67,15 @@ RUN mkdir -p /etc/default /etc/mysql
 COPY --from=builder /go/src/github.com/odise/go-cron/go-cron /usr/local/bin/
 COPY automysqlbackup start.sh /usr/local/bin/
 COPY my.cnf /etc/mysql/
+# Add extra scripts since we are depending on an external service, so we need to be able to check if it is up
+COPY pre-start.sh /usr/local/bin/pre-start.sh
+COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
 RUN chmod +x /usr/local/bin/go-cron \
     /usr/local/bin/automysqlbackup \
-    /usr/local/bin/start.sh
+    /usr/local/bin/start.sh \
+    /usr/local/bin/pre-start.sh \
+    /usr/local/bin/wait-for-it.sh
 
 RUN groupadd --system automysqlbackup --gid=1000 && useradd --system --uid=1000 --gid automysqlbackup automysqlbackup
 
@@ -124,4 +129,4 @@ ENV USERNAME=           \
     USER_ID=1           \
     GROUP_ID=
 
-CMD ["start.sh"]
+CMD ["pre-start.sh"]

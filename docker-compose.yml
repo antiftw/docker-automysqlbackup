@@ -31,8 +31,6 @@ services:
       DBEXCLUDE: "performance_schema information_schema"
       CRON_SCHEDULE: "0 0 * * *"
       EXTRA_OPTS: "--single-transaction"
-    depends_on:
-      - database
 networks:
   caddy:
     external: true
