@@ -32,4 +32,8 @@ services:
       CRON_SCHEDULE: "0 0 * * *"
       EXTRA_OPTS: "--single-transaction"
     depends_on:
-      - mysql
+      - database
+networks:
+  caddy:
+    external: true
+

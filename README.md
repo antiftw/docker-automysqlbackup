@@ -9,7 +9,9 @@ Runs a slightly modified [AutoMySQLBackup](https://sourceforge.net/projects/auto
 - Also added two scripts that will be run before and after the backup:
   - Pre: Make sure that the WebDav storage is mounted.
   - Post: Make sure that backups older than ~3 months (90 days) are purged.
-- Removed MySQL service from docker-compose.yml, since we will be using our own production container to be backupped, which is - like in the original repo - configured with the `DBHOST` environment variable.
+- Removed MySQL service from docker-compose.yml:
+  - We will be using our own production container to be backupped, which is - like in the original repo - configured with the `DBHOST` environment variable.
+  - We also be using this in a setup that runs behind a reverse proxy using [Caddy Docker Proxy](https://github.com/lucaslorentz/caddy-docker-proxy), which means we will be using an external network called `caddy` to make sure the `DBHOST` service is available to AutoMysqlBackup. If you have not yet created this network, type `docker network create caddy` to create one. This only needs to happen once on setup.
 
 ## Supported tags and respective `Dockerfile` links
 
