@@ -1,0 +1,4 @@
+#!/bin/bash
+printf "Performing POST-Backup script for AutoMySQLBackup - Purging old backups\n"
+# Find files older than 90 days and delete them
+find "/mnt/koofr/backups/antiftw/db/" -type f -mtime +90 -delete

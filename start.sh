@@ -54,6 +54,44 @@ if [ "$GROUP_ID" ]; then
         fi
 fi
 
+## START Configure WebDAV ##
+
+# Get WEBDAV_PASS from WEBDAV_PASS_FILE if available
+file_env 'WEBDAV_PASS'
+
+# Set variables
+WEBDAV_MOUNT_POINT="/mnt/koofr"
+DAVFS_SECRET_FILE="/etc/davfs2/secrets"
+WEBDAV_MOUNT_URL="https://app.koofr.net:443/dav/Koofr/"
+# davs://app.koofr.net:443/dav/Koofr
+
+# Create mount point
+mkdir -p "${WEBDAV_MOUNT_POINT}"
+chmod 700 "${WEBDAV_MOUNT_POINT}"
+
+# Fill in credentials
+if [ "${WEBDAV_PASS}" ]; then
+    echo "${WEBDAV_MOUNT_POINT} ${WEBDAV_USER} ${WEBDAV_PASS}" >> "$DAVFS_SECRET_FILE";
+    chmod 600 "${DAVFS_SECRET_FILE}"
+else  
+    echo "No WebDAV password provided, please set WEBDAV_PASS or WEBDEV_PASS_FILE environment variable"
+    exit 1
+fi
+
+BACKUP_LOCATION="${WEBDAV_MOUNT_POINT}/backups/antiftw/db/"
+
+# Check if backup location directory exists, if not, create it
+if [ ! -d "$BACKUP_LOCATION" ]; then
+    mkdir -p "$BACKUP_LOCATION";
+fi
+
+# Mount WebDAV share
+echo "$WEBDAV_MOUNT_URL $WEBDAV_MOUNT_POINT davfs defaults,uid=root,_netdev,auto 0 0" >> /etc/fstab
+mount -a
+
+## END Configure WebDAV ##
+
+# Configure cronjob if set, or execute backup
 if [ "${CRON_SCHEDULE}" ]; then
     exec gosu $user:$group go-cron -s "0 ${CRON_SCHEDULE}" -- automysqlbackup
 else

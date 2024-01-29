@@ -1,0 +1,19 @@
+#!/bin/bash
+printf "Checking preconditions for AutoMySQLBackup\n"
+
+# Check if we can fetch the mount point associated with the KoofR share
+if [[ -n "$(df -h --output=target | grep "</mnt/koofr>")" ]]; then
+   printf "WebDAV is mounted\n"
+else
+  # If we cant find the mount point, start the auto-mounting service
+  printf "Enabling WebDAV Auto-mounting service\n"
+
+  mount -a; RETURN_STATUS=$?
+  if [ "$RETURN_STATUS" -ne 0 ]; then
+    # If we are unable to enable the service, exit
+    printf "WebDAV mounting failed\n"
+    printf "Use 'journalctl -b -p 3' to debug mounting errors\n";
+    printf "Aborting backup\n"
+    exit;
+  fi
+fi

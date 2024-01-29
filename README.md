@@ -1,7 +1,15 @@
-# Docker AutoMySQLBackup
+# Fork of Docker AutoMySQLBackup
 
 A lightweight image for creating and managing scheduled MySQL backups.
 Runs a slightly modified [AutoMySQLBackup](https://sourceforge.net/projects/automysqlbackup/) utility.
+
+## Added/Altered funtionality:
+
+- This fork was mainly created to add WebDav support to the original repository. It allows the mounting of a WebDav storage through modification of /etc/fstab, so that we can directly backup our databases to an external storage.
+- Also added two scripts that will be run before and after the backup:
+  - Pre: Make sure that the WebDav storage is mounted.
+  - Post: Make sure that backups older than ~3 months (90 days) are purged.
+- Removed MySQL service from docker-compose.yml, since we will be using our own production container to be backupped, which is - like in the original repo - configured with the `DBHOST` environment variable.
 
 ## Supported tags and respective `Dockerfile` links
 

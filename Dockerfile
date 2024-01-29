@@ -9,7 +9,7 @@ RUN go get -d -v github.com/odise/go-cron \
 
 # Package
 FROM debian:bullseye-slim
-LABEL maintainer="selim013@gmail.com"
+LABEL maintainer="admin@antiftw.nl"
 
 RUN apt-get update && apt-get install -y --no-install-recommends gnupg dirmngr bzip2 && rm -rf /var/lib/apt/lists/*
 
@@ -55,7 +55,10 @@ ENV MYSQL_MAJOR 8.0
 
 RUN echo "deb http://repo.mysql.com/apt/debian/ bullseye mysql-${MYSQL_MAJOR}" > /etc/apt/sources.list.d/mysql.list
 
-RUN apt-get update \
+# Added key because of an error: 
+# "The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 8C718D3B5072E1F5"
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys B7B3B788A8D3785C \
+    && apt-get update \
     && apt-get install -y mysql-community-client-core \
     && rm -rf /var/lib/apt/lists/*
 
@@ -70,6 +73,29 @@ RUN chmod +x /usr/local/bin/go-cron \
     /usr/local/bin/start.sh
 
 RUN groupadd --system automysqlbackup --gid=1000 && useradd --system --uid=1000 --gid automysqlbackup automysqlbackup
+
+## Start - Install and configure davfs2 ##
+# 1. Prevent installation prompt, by setting suid_file to false (only root can mount)
+# 2. Install ca-certificates
+# 3. Unset mozilla/DigiCert exclusions
+# 4. Update ca-certificates
+# 5. Install davfs2
+
+RUN echo "davfs2 davfs2/suid_file boolean false" | debconf-set-selections \
+    && apt-get update \
+    && apt-get install ca-certificates -y \
+    && perl -pi -e 's/^!(?=mozilla\/DigiCert)//' /etc/ca-certificates.conf \
+    && update-ca-certificates \
+    && apt-get install -y davfs2 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY webdav/mysql-backup-post /etc/automysqlbackup/mysql-backup-post
+COPY webdav/mysql-backup-pre /etc/automysqlbackup/mysql-backup-pre
+
+RUN chmod +x /etc/automysqlbackup/mysql-backup-post \
+    /etc/automysqlbackup/mysql-backup-pre
+
+## End - Install and configure davfs2 ##
 
 WORKDIR /backup
 

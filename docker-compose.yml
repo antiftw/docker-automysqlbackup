@@ -5,20 +5,28 @@ volumes:
   mysql-backups-data: {}
 
 services:
-  mysql:
-    image: mysql:8.0
-    volumes:
-      - "mysql-data:/var/lib/mysql"
-    environment:
-      MYSQL_ROOT_PASSWORD: "my-secret-pw"
-
   mysqlbackup:
-    image: selim13/automysqlbackup:2.6-9
+    # For now we use a custom build context.
+    # TODO: build a new image based on the new context
+    #       and push it to docker hub
+    #image: selim13/automysqlbackup:2.6-9
+    build:
+      context: .
     volumes:
-      - "mysql-backups-data:/backup"
+      - "mysql-backups-data:/mnt/koofr/backups/antiftw/db"
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - "/dev/fuse:/dev/fuse"
     environment:
       USERNAME: root
       PASSWORD: "my-secret-pw"
+      WEBDAV_USER: ${WEBDAV_USER:-"admin@antiftw.nl"}
+      WEBDAV_PASS: ${WEBDAV_PASS}
+      WEBDAV_MOUNT_POINT: ${WEBDAV_MOUNT_POINT:-"/mnt/koofr"}
+      PREBACKUP: ./etc/automysqlbackup/mysql-backup-pre
+      POSTBACKUP: ./etc/automysqlbackup/mysql-backup-post
       DBHOST: mysql
       DBEXCLUDE: "performance_schema information_schema"
       CRON_SCHEDULE: "0 0 * * *"
