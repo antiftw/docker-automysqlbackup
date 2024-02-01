@@ -7,6 +7,13 @@ RUN go get -d -v github.com/odise/go-cron \
     && cd /go/src/github.com/odise/go-cron \
     && CGO_ENABLED=0 GOOS=linux go build -o go-cron bin/go-cron.go
 
+# Full package so we can get mysqldump from default-myql-client because it does not exist in default-mysql-client-core
+# and default-mysql-client does not exist in debian:bullseye-slim. We do need mysqldump since automysqlbackup uses it.
+# https://packages.debian.org/bullseye/default-mysql-client
+
+FROM debian:bullseye as mysqldump
+RUN apt-get update && apt-get install -y --no-install-recommends default-mysql-client && rm -rf /var/lib/apt/lists/*
+
 # Package
 FROM debian:bullseye-slim
 LABEL maintainer="admin@antiftw.nl"
@@ -101,6 +108,9 @@ RUN chmod +x /etc/automysqlbackup/mysql-backup-post \
     /etc/automysqlbackup/mysql-backup-pre
 
 ## End - Install and configure davfs2 ##
+
+## Copy mysqldump from mysqldump stage ##
+COPY --from=mysqldump /usr/bin/mysqldump /usr/bin/mysqldump
 
 WORKDIR /backup
 

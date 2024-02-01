@@ -8,31 +8,37 @@ services:
   mysqlbackup:
     # For now we use a custom build context.
     # TODO: build a new image based on the new context
-    #       and push it to docker hub
-    #image: selim13/automysqlbackup:2.6-9
+    #       and push it to docker hub (not sure if its necessary)
+    #image: antiftw/automysqlbackup:1.0.0
     build:
       context: .
     volumes:
       - "mysql-backups-data:/mnt/koofr/backups/antiftw/db"
+    networks:
+      # Use the backend network to connect to the database
+      - backend
     privileged: true
     cap_add:
       - SYS_ADMIN
     devices:
       - "/dev/fuse:/dev/fuse"
     environment:
-      USERNAME: root
-      PASSWORD: "my-secret-pw"
-      WEBDAV_USER: ${WEBDAV_USER:-"admin@antiftw.nl"}
+      USERNAME: ${DBUSER}
+      PASSWORD: ${DBPASS}
+      BACKUPDIR: /mnt/koofr/backups/antiftw/db
+      WEBDAV_USER: ${WEBDAV_USER}
       WEBDAV_PASS: ${WEBDAV_PASS}
       WEBDAV_MOUNT_POINT: ${WEBDAV_MOUNT_POINT:-"/mnt/koofr"}
-      PREBACKUP: ./etc/automysqlbackup/mysql-backup-pre
-      POSTBACKUP: ./etc/automysqlbackup/mysql-backup-post
-      DBHOST: mysql
+      PREBACKUP: /etc/automysqlbackup/mysql-backup-pre
+      POSTBACKUP: /etc/automysqlbackup/mysql-backup-post
+      DBHOST: database
       DBEXCLUDE: "performance_schema information_schema"
       CRON_SCHEDULE: "0 0 * * *"
       EXTRA_OPTS: "--single-transaction"
 networks:
-  caddy:
-    external: true
+  backend:
+    # Must be named explicitly so that the network names are deterministic, and exactly the same for both projects
+    # Otherwise docker-compose will create a new network with a different name for each project
+    name: backend
 
 
