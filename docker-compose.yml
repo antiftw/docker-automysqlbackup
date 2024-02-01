@@ -6,6 +6,7 @@ volumes:
 
 services:
   mysqlbackup:
+    container_name: automysqlbackup
     # For now we use a custom build context.
     # TODO: build a new image based on the new context
     #       and push it to docker hub (not sure if its necessary)
@@ -40,5 +41,6 @@ networks:
     # Must be named explicitly so that the network names are deterministic, and exactly the same for both projects
     # Otherwise docker-compose will create a new network with a different name for each project
     name: backend
+    external: true
 
 
