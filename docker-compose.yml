@@ -6,6 +6,7 @@ volumes:
 
 services:
   mysqlbackup:
+    restart: unless-stopped
     container_name: automysqlbackup
     # For now we use a custom build context.
     # TODO: build a new image based on the new context
