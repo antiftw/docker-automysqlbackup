@@ -42,6 +42,7 @@ networks:
     # Must be named explicitly so that the network names are deterministic, and exactly the same for both projects
     # Otherwise docker-compose will create a new network with a different name for each project
     name: backend
-    external: true
+    # Use an internal network so that the database is not accessible from the outside
+    internal: true
 
 
