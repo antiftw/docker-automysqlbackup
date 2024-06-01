@@ -37,6 +37,11 @@ services:
       DBEXCLUDE: "performance_schema information_schema"
       CRON_SCHEDULE: "0 0 * * *"
       EXTRA_OPTS: "--single-transaction"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
 networks:
   backend:
     # Must be named explicitly so that the network names are deterministic, and exactly the same for both projects
